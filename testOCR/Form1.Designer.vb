@@ -22,7 +22,7 @@ Partial Class Form1
     'コード エディターを使って変更しないでください。
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
-        Dim DataGridViewCellStyle3 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle5 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
         Me.Button1 = New System.Windows.Forms.Button()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
         Me.btnSend = New System.Windows.Forms.Button()
@@ -144,9 +144,9 @@ Partial Class Form1
         Me.txtLocation.ImeMode = System.Windows.Forms.ImeMode.Disable
         Me.txtLocation.Location = New System.Drawing.Point(175, 9)
         Me.txtLocation.Name = "txtLocation"
-        Me.txtLocation.Size = New System.Drawing.Size(317, 24)
+        Me.txtLocation.Size = New System.Drawing.Size(415, 24)
         Me.txtLocation.TabIndex = 1
-        Me.txtLocation.Text = "C:\"
+        Me.txtLocation.Text = "file://192.168.1.208/受信fax/70_管理部/★請求書発行"
         '
         'colCheck
         '
@@ -184,9 +184,9 @@ Partial Class Form1
         '
         'colFiles
         '
-        DataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
-        DataGridViewCellStyle3.BackColor = System.Drawing.Color.NavajoWhite
-        Me.colFiles.DefaultCellStyle = DataGridViewCellStyle3
+        DataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
+        DataGridViewCellStyle5.BackColor = System.Drawing.Color.NavajoWhite
+        Me.colFiles.DefaultCellStyle = DataGridViewCellStyle5
         Me.colFiles.FlatStyle = System.Windows.Forms.FlatStyle.System
         Me.colFiles.HeaderText = "添付ファイル"
         Me.colFiles.Name = "colFiles"

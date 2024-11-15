@@ -183,17 +183,11 @@ Public Class Form1
         If isFLGSend Then MessageBox.Show("メールを送信しました。")
     End Sub
 
-
     Private Function LoadFileini(isKey As String) As DataTable
-
-        ' Kiểm tra nếu file không tồn tại
         If Not IO.File.Exists(fileINI) Then Return Nothing
-
-        ' Đọc tất cả các dòng trong file INI
         Dim lines As String() = IO.File.ReadAllLines(fileINI)
         Dim captureData As Boolean = False
 
-        ' Khởi tạo DataTable với các cột tương ứng
         Dim dataTable As New DataTable()
         dataTable.Columns.Add("Code", GetType(String))
         dataTable.Columns.Add("Company", GetType(String))
@@ -201,14 +195,12 @@ Public Class Form1
         dataTable.Columns.Add("Email", GetType(String))
 
         For Each line As String In lines
-            ' Kiểm tra nếu dòng là một tiêu đề, ví dụ: [15日], [20日], hoặc [末]
+            ' [15日], [20日], hoặc [末]
             If line.Trim().StartsWith("[") AndAlso line.Trim().EndsWith("]") Then
-                ' Đặt captureData là True khi gặp tiêu đề đúng với isKey hoặc nếu isKey là chuỗi rỗng
                 captureData = (isKey = "" OrElse line.Trim() = "[" + isKey + "]")
             ElseIf captureData Then
-                ' Nếu đang ở trong phần cần lấy dữ liệu hoặc isKey là rỗng, thêm dòng vào DataTable
                 If Not String.IsNullOrWhiteSpace(line) Then
-                    ' Tách dòng thành các cột dựa trên ký tự "/"
+
                     Dim values = line.Split("/"c)
                     If values.Length = 4 Then
                         dataTable.Rows.Add(values(0).Trim(), values(1).Trim(), values(2).Trim(), values(3).Trim())
@@ -217,7 +209,6 @@ Public Class Form1
             End If
         Next
 
-        ' Kiểm tra và trả về DataTable nếu có dữ liệu
         Return If(dataTable.Rows.Count > 0, dataTable, Nothing)
     End Function
 
@@ -225,22 +216,18 @@ Public Class Form1
         If e.ColumnIndex = dgvMain.Columns("colFiles").Index AndAlso e.RowIndex >= 0 Then
             Dim openFileDialog As New OpenFileDialog()
 
-            ' Cho phép chọn nhiều file
             openFileDialog.Multiselect = True
-
-            ' Lọc chỉ hiển thị file PDF
             openFileDialog.Filter = "PDF Files (*.pdf)|*.pdf|All Files (*.*)|*.*"
             openFileDialog.Title = "Chọn file PDF"
+            If Not String.IsNullOrEmpty(txtLocation.Text) Then
+                openFileDialog.InitialDirectory = txtLocation.Text
 
-            ' Hiển thị hộp thoại và kiểm tra nếu người dùng đã chọn các file
+            End If
+
             If openFileDialog.ShowDialog() = DialogResult.OK Then
-                ' Lấy các đường dẫn file đã chọn
                 Dim selectedFiles As String() = openFileDialog.FileNames
-
-                ' Tạo chuỗi đường dẫn file (có thể ngăn cách bằng dấu phẩy hoặc ký tự khác)
                 Dim fileLinks As String = "[Files: " + selectedFiles.Count.ToString() + "]" + String.Join(",", selectedFiles)
 
-                ' Cập nhật cột colLink của dòng hiện tại với chuỗi đường dẫn các file
                 dgvMain.Rows(e.RowIndex).Cells("colLink").Value = fileLinks
                 dgvMain.Rows(e.RowIndex).Cells("colCheck").Value = True
             End If
@@ -267,7 +254,6 @@ Public Class Form1
             e_mail.To.Add(isMail)
             e_mail.Subject = "【日鋼ステンレス】" + isKaisha + " 様 請求書"
 
-            '"分の納品書送信 日鋼ステンレス" 
             e_mail.IsBodyHtml = False
             e_mail.Body = isKaisha + " 御中" + vbNewLine + isTantou.Replace(",", vbNewLine).Replace("、", vbNewLine) + vbNewLine + vbNewLine +
                          "いつも大変お世話になっております。" + vbNewLine + vbNewLine +
