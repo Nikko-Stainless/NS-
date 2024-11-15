@@ -6,11 +6,12 @@ Imports System.Text.RegularExpressions
 Imports System.Net.Mail
 
 Public Class Form1
+    Dim fileINI = ""
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        txtSeikyusaki.Focus()
-
         Dim currentMonth As Integer = DateTime.Now.Month
         cbbMonth.SelectedIndex = currentMonth - 1
+        fileINI = Application.StartupPath + "\settingApp\mailSetting.ini"
+
     End Sub
 
 #Region "①PDF名変換"
@@ -130,88 +131,123 @@ Public Class Form1
 
     ' 無効なファイル名の文字を置換する関数
     Private Function ReplaceInvalidCharacters(fileName As String) As String
-        ' Windowsで使用できない文字をスペースに置換
         For Each invalidChar In IO.Path.GetInvalidFileNameChars()
             fileName = fileName.Replace(invalidChar, " "c)
         Next
 
         Return fileName
     End Function
-
 #End Region
 #Region "②送信"
-    ' Chỉ cho phép nhập số trong txtSeikyusaki
-    Private Sub txtSeikyusaki_KeyPress(sender As Object, e As KeyPressEventArgs) Handles txtSeikyusaki.KeyPress
-        ' Kiểm tra nếu ký tự không phải là số hoặc không phải phím điều khiển như Backspace
-        If Not Char.IsDigit(e.KeyChar) AndAlso Not Char.IsControl(e.KeyChar) Then
-            e.Handled = True ' Loại bỏ ký tự nếu không phải số
+    Private Sub LinkLabel1_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles LinkLabel1.LinkClicked
+        If IO.File.Exists(fileINI) Then
+            Process.Start(fileINI)
         End If
     End Sub
-
-    ' Tự động thêm số 0 vào trước dãy số nếu không đủ 5 chữ số khi nhấn Enter
-    Private Sub txtSeikyusaki_Validated() Handles txtSeikyusaki.Validated
-        txtSeikyusaki.Text = txtSeikyusaki.Text.PadLeft(5, "0"c)
+    Private Sub btnSearch_Click(sender As Object, e As EventArgs) Handles btnSearch.Click
+        Dim data = LoadFileini(cbbShimei.SelectedItem.ToString)
+        dgvMain.AutoGenerateColumns = False
+        dgvMain.DataSource = data
     End Sub
+    Private Sub btnSend_Click(sender As Object, e As EventArgs) Handles btnSend.Click
+        Dim isFLGSend As Boolean = False
+        For i = 0 To dgvMain.Rows.Count - 1
+            If dgvMain.Rows(i).Cells("colCheck").Value = True Then
+                Dim mail = dgvMain.Rows(i).Cells("colEmail").Value.ToString()
+                If String.IsNullOrEmpty(mail) Then
+                    MessageBox.Show("メールアドレスを入力してください")
+                    Return
+                End If
 
-    Private Sub txtSeikyusaki_TextChanged(sender As Object, e As EventArgs) Handles txtSeikyusaki.TextChanged
-        ' Kiểm tra nếu chuỗi đủ 5 ký tự
-        If txtSeikyusaki.Text.Length = 5 Then
-            ' Gọi hàm tìm kiếm với giá trị trong txtSeikyusaki
-            Dim searchKey As String = txtSeikyusaki.Text
-            SearchData(searchKey)
-        End If
-    End Sub
+                Dim kaisha = dgvMain.Rows(i).Cells("colCompany").Value.ToString()
+                If String.IsNullOrEmpty(kaisha) Then
+                    MessageBox.Show("請求先名を入力してください")
+                    Return
+                End If
 
-    Private Sub SearchData(searchKey As String)
-        If LoadFileini() Is Nothing Then Return
-        Dim result = LoadFileini()
-        txtKaishamei.Text = result(1)
-        txtTantou.Text = result(2)
-        txtAddress.Text = result(3)
-        txtFile.Text = ""
-        Button2.Enabled = True
-    End Sub
-    Private Function LoadFileini() As String()
-        Dim fileINI = Application.StartupPath + "\settingApp\mailSetting.ini"
+                Dim tantou = dgvMain.Rows(i).Cells("colContact").Value.ToString()
+                Dim files = dgvMain.Rows(i).Cells("colLink").Value.ToString()
+                If String.IsNullOrEmpty(files) Then
+                    MessageBox.Show("ファイルを選択してください")
+                    Return
+                End If
 
-        If Not IO.File.Exists(fileINI) Then Return Nothing
+                files = files.Substring(files.IndexOf("]") + 1)
+                If sendMail(mail, kaisha, tantou, files) Then
+                    dgvMain.Rows(i).Cells("colCheck").Value = False
+                End If
 
-        Dim lines As String() = IO.File.ReadAllLines(fileINI)
-
-        For Each line As String In lines
-            Dim values = line.Split("/")
-            Dim key = values(0)
-            If txtSeikyusaki.Text = key Then
-                Return values
+                isFLGSend = True
             End If
         Next
-        Return Nothing
+        If isFLGSend Then MessageBox.Show("メールを送信しました。")
+    End Sub
+
+
+    Private Function LoadFileini(isKey As String) As DataTable
+
+        ' Kiểm tra nếu file không tồn tại
+        If Not IO.File.Exists(fileINI) Then Return Nothing
+
+        ' Đọc tất cả các dòng trong file INI
+        Dim lines As String() = IO.File.ReadAllLines(fileINI)
+        Dim captureData As Boolean = False
+
+        ' Khởi tạo DataTable với các cột tương ứng
+        Dim dataTable As New DataTable()
+        dataTable.Columns.Add("Code", GetType(String))
+        dataTable.Columns.Add("Company", GetType(String))
+        dataTable.Columns.Add("Contact", GetType(String))
+        dataTable.Columns.Add("Email", GetType(String))
+
+        For Each line As String In lines
+            ' Kiểm tra nếu dòng là một tiêu đề, ví dụ: [15日], [20日], hoặc [末]
+            If line.Trim().StartsWith("[") AndAlso line.Trim().EndsWith("]") Then
+                ' Đặt captureData là True khi gặp tiêu đề đúng với isKey hoặc nếu isKey là chuỗi rỗng
+                captureData = (isKey = "" OrElse line.Trim() = "[" + isKey + "]")
+            ElseIf captureData Then
+                ' Nếu đang ở trong phần cần lấy dữ liệu hoặc isKey là rỗng, thêm dòng vào DataTable
+                If Not String.IsNullOrWhiteSpace(line) Then
+                    ' Tách dòng thành các cột dựa trên ký tự "/"
+                    Dim values = line.Split("/"c)
+                    If values.Length = 4 Then
+                        dataTable.Rows.Add(values(0).Trim(), values(1).Trim(), values(2).Trim(), values(3).Trim())
+                    End If
+                End If
+            End If
+        Next
+
+        ' Kiểm tra và trả về DataTable nếu có dữ liệu
+        Return If(dataTable.Rows.Count > 0, dataTable, Nothing)
     End Function
 
-    Private Sub btnFile_Click(sender As Object, e As EventArgs) Handles btnFile.Click
-        Dim openFileDialog As New OpenFileDialog()
-        openFileDialog.InitialDirectory = txtLocation.Text
-        ' Lọc chỉ hiển thị file PDF
-        openFileDialog.Filter = "PDF Files (*.pdf)|*.pdf|All Files (*.*)|*.*"
-        openFileDialog.Title = "Chọn file PDF"
+    Private Sub dgvMain_CellClick(sender As Object, e As DataGridViewCellEventArgs) Handles dgvMain.CellClick
+        If e.ColumnIndex = dgvMain.Columns("colFiles").Index AndAlso e.RowIndex >= 0 Then
+            Dim openFileDialog As New OpenFileDialog()
 
-        ' Hiển thị hộp thoại và kiểm tra nếu người dùng đã chọn một file
-        If openFileDialog.ShowDialog() = DialogResult.OK Then
-            ' Lấy đường dẫn file đã chọn
-            Dim selectedFilePath As String = openFileDialog.FileName
-            txtFile.Text += selectedFilePath + ","
+            ' Cho phép chọn nhiều file
+            openFileDialog.Multiselect = True
+
+            ' Lọc chỉ hiển thị file PDF
+            openFileDialog.Filter = "PDF Files (*.pdf)|*.pdf|All Files (*.*)|*.*"
+            openFileDialog.Title = "Chọn file PDF"
+
+            ' Hiển thị hộp thoại và kiểm tra nếu người dùng đã chọn các file
+            If openFileDialog.ShowDialog() = DialogResult.OK Then
+                ' Lấy các đường dẫn file đã chọn
+                Dim selectedFiles As String() = openFileDialog.FileNames
+
+                ' Tạo chuỗi đường dẫn file (có thể ngăn cách bằng dấu phẩy hoặc ký tự khác)
+                Dim fileLinks As String = "[Files: " + selectedFiles.Count.ToString() + "]" + String.Join(",", selectedFiles)
+
+                ' Cập nhật cột colLink của dòng hiện tại với chuỗi đường dẫn các file
+                dgvMain.Rows(e.RowIndex).Cells("colLink").Value = fileLinks
+                dgvMain.Rows(e.RowIndex).Cells("colCheck").Value = True
+            End If
         End If
     End Sub
 
-    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
-        If String.IsNullOrEmpty(txtKaishamei.Text) OrElse String.IsNullOrEmpty(txtAddress.Text) Then Return
-        If sendNotificationOnly() Then
-            MessageBox.Show("メールを送信しました。")
-            Button2.Enabled = False
-            txtSeikyusaki.Focus()
-        End If
-    End Sub
-    Public Function sendNotificationOnly() As Boolean
+    Public Function sendMail(isMail As String, isKaisha As String, isTantou As String, isFiles As String) As Boolean
         Try
             Dim MailAddress = "robot01@nikko-sus.co.jp"
             Dim password = "3Bi0x21Qea5qOPFu"
@@ -228,26 +264,22 @@ Public Class Form1
             e_mail = New MailMessage()
             e_mail.From = New MailAddress(MailAddress)
 
-            e_mail.To.Add(txtAddress.Text)
-            e_mail.Subject = "【日鋼ステンレス】" + txtKaishamei.Text + " 様 請求書"
+            e_mail.To.Add(isMail)
+            e_mail.Subject = "【日鋼ステンレス】" + isKaisha + " 様 請求書"
 
             '"分の納品書送信 日鋼ステンレス" 
             e_mail.IsBodyHtml = False
-            e_mail.Body = txtKaishamei.Text + " 御中" + vbNewLine + txtTantou.Text.Replace(",", vbNewLine).Replace("、", vbNewLine) + vbNewLine + vbNewLine +
+            e_mail.Body = isKaisha + " 御中" + vbNewLine + isTantou.Replace(",", vbNewLine).Replace("、", vbNewLine) + vbNewLine + vbNewLine +
                          "いつも大変お世話になっております。" + vbNewLine + vbNewLine +
                          cbbMonth.SelectedItem.ToString() + "分請求書が発行できましたので送付致します。" + vbNewLine + "御確認宜しくお願い致します。" + vbNewLine + vbNewLine +
                  "□■━━━━━━━━━━━━━━━━━━
-  日鋼ステンレス株式会社
-  管 理 部　 　山本 洋子
-  TEL：06-6475-0950
-　FAX：06-6475-0920
-  Email:y.yamamoto@nikko-sus.co.jp
-━━━━━━━━━━━━━━━━━━■□"
-            Dim files() As String = txtFile.Text.Split(",")
-            If files.Count = 1 Then '添付ファイルがないとき送信なし
-                MessageBox.Show("添付ファイルを選択してください。")
-                Return False
-            End If
+      日鋼ステンレス株式会社
+      管 理 部　 　山本 洋子
+      TEL：06-6475-0950
+    　FAX：06-6475-0920
+      Email:y.yamamoto@nikko-sus.co.jp
+    ━━━━━━━━━━━━━━━━━━■□"
+            Dim files() As String = isFiles.Split(",")
 
             For Each sFile As String In files
                 If String.IsNullOrEmpty(sFile) Then Continue For
@@ -283,12 +315,7 @@ Public Class Form1
         End Try
     End Function
 
-    Private Sub txtSeikyusaki_KeyDown(sender As Object, e As KeyEventArgs) Handles txtSeikyusaki.KeyDown
-        If e.KeyCode = Keys.Enter Then
-            Button2.Focus()
-            e.Handled = True
-        End If
-    End Sub
+
 #End Region
 
 End Class
