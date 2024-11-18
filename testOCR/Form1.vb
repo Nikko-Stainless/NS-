@@ -11,7 +11,7 @@ Public Class Form1
         Dim currentMonth As Integer = DateTime.Now.Month
         cbbMonth.SelectedIndex = currentMonth - 1
         fileINI = Application.StartupPath + "\settingApp\mailSetting.ini"
-
+        cbbShimei.SelectedIndex = 0
     End Sub
 
 #Region "①PDF名変換"
@@ -53,6 +53,7 @@ Public Class Form1
                 End Try
             End If
         Next
+        MessageBox.Show("変換しました。")
     End Sub
     ' PDFファイルの内容を読み取る関数
     Function ReadPdfFile(pdfPath As String) As String
@@ -236,8 +237,8 @@ Public Class Form1
 
     Public Function sendMail(isMail As String, isKaisha As String, isTantou As String, isFiles As String) As Boolean
         Try
-            Dim MailAddress = "robot01@nikko-sus.co.jp"
-            Dim password = "3Bi0x21Qea5qOPFu"
+            Dim MailAddress = "keiri@nikko-sus.co.jp"
+            Dim password = "pegupegu1"
             Dim host = "smtp.nikko-sus.co.jp"
 
             Dim Smtp_Server As New SmtpClient

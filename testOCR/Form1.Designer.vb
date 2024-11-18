@@ -22,15 +22,16 @@ Partial Class Form1
     'コード エディターを使って変更しないでください。
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
-        Dim DataGridViewCellStyle5 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim DataGridViewCellStyle1 As System.Windows.Forms.DataGridViewCellStyle = New System.Windows.Forms.DataGridViewCellStyle()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Form1))
         Me.Button1 = New System.Windows.Forms.Button()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
+        Me.LinkLabel1 = New System.Windows.Forms.LinkLabel()
         Me.btnSend = New System.Windows.Forms.Button()
         Me.btnSearch = New System.Windows.Forms.Button()
         Me.cbbShimei = New System.Windows.Forms.ComboBox()
         Me.cbbMonth = New System.Windows.Forms.ComboBox()
         Me.dgvMain = New System.Windows.Forms.DataGridView()
-        Me.txtLocation = New System.Windows.Forms.TextBox()
         Me.colCheck = New System.Windows.Forms.DataGridViewCheckBoxColumn()
         Me.Code = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.colCompany = New System.Windows.Forms.DataGridViewTextBoxColumn()
@@ -38,7 +39,7 @@ Partial Class Form1
         Me.colEmail = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.colFiles = New System.Windows.Forms.DataGridViewButtonColumn()
         Me.colLink = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.LinkLabel1 = New System.Windows.Forms.LinkLabel()
+        Me.txtLocation = New System.Windows.Forms.TextBox()
         Me.GroupBox1.SuspendLayout()
         CType(Me.dgvMain, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
@@ -73,6 +74,17 @@ Partial Class Form1
         Me.GroupBox1.TabIndex = 2
         Me.GroupBox1.TabStop = False
         Me.GroupBox1.Text = "②メール送信"
+        '
+        'LinkLabel1
+        '
+        Me.LinkLabel1.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.LinkLabel1.AutoSize = True
+        Me.LinkLabel1.Location = New System.Drawing.Point(1034, 36)
+        Me.LinkLabel1.Name = "LinkLabel1"
+        Me.LinkLabel1.Size = New System.Drawing.Size(79, 17)
+        Me.LinkLabel1.TabIndex = 20
+        Me.LinkLabel1.TabStop = True
+        Me.LinkLabel1.Text = "メールマスター"
         '
         'btnSend
         '
@@ -139,15 +151,6 @@ Partial Class Form1
         Me.dgvMain.Size = New System.Drawing.Size(1111, 344)
         Me.dgvMain.TabIndex = 6
         '
-        'txtLocation
-        '
-        Me.txtLocation.ImeMode = System.Windows.Forms.ImeMode.Disable
-        Me.txtLocation.Location = New System.Drawing.Point(175, 9)
-        Me.txtLocation.Name = "txtLocation"
-        Me.txtLocation.Size = New System.Drawing.Size(415, 24)
-        Me.txtLocation.TabIndex = 1
-        Me.txtLocation.Text = "file://192.168.1.208/受信fax/70_管理部/★請求書発行"
-        '
         'colCheck
         '
         Me.colCheck.HeaderText = ""
@@ -184,9 +187,9 @@ Partial Class Form1
         '
         'colFiles
         '
-        DataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
-        DataGridViewCellStyle5.BackColor = System.Drawing.Color.NavajoWhite
-        Me.colFiles.DefaultCellStyle = DataGridViewCellStyle5
+        DataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter
+        DataGridViewCellStyle1.BackColor = System.Drawing.Color.NavajoWhite
+        Me.colFiles.DefaultCellStyle = DataGridViewCellStyle1
         Me.colFiles.FlatStyle = System.Windows.Forms.FlatStyle.System
         Me.colFiles.HeaderText = "添付ファイル"
         Me.colFiles.Name = "colFiles"
@@ -201,15 +204,14 @@ Partial Class Form1
         Me.colLink.HeaderText = "ファイルリンク"
         Me.colLink.Name = "colLink"
         '
-        'LinkLabel1
+        'txtLocation
         '
-        Me.LinkLabel1.AutoSize = True
-        Me.LinkLabel1.Location = New System.Drawing.Point(1034, 36)
-        Me.LinkLabel1.Name = "LinkLabel1"
-        Me.LinkLabel1.Size = New System.Drawing.Size(79, 17)
-        Me.LinkLabel1.TabIndex = 20
-        Me.LinkLabel1.TabStop = True
-        Me.LinkLabel1.Text = "メールマスター"
+        Me.txtLocation.ImeMode = System.Windows.Forms.ImeMode.Disable
+        Me.txtLocation.Location = New System.Drawing.Point(175, 9)
+        Me.txtLocation.Name = "txtLocation"
+        Me.txtLocation.Size = New System.Drawing.Size(415, 24)
+        Me.txtLocation.TabIndex = 1
+        Me.txtLocation.Text = "\\192.168.1.208\受信fax\70_管理部\★請求書発行"
         '
         'Form1
         '
@@ -220,10 +222,11 @@ Partial Class Form1
         Me.Controls.Add(Me.GroupBox1)
         Me.Controls.Add(Me.Button1)
         Me.Font = New System.Drawing.Font("Meiryo UI", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(128, Byte))
+        Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.KeyPreview = True
         Me.Margin = New System.Windows.Forms.Padding(3, 5, 3, 5)
         Me.Name = "Form1"
-        Me.Text = "Form1"
+        Me.Text = "請求書メール"
         Me.GroupBox1.ResumeLayout(False)
         Me.GroupBox1.PerformLayout()
         CType(Me.dgvMain, System.ComponentModel.ISupportInitialize).EndInit()
