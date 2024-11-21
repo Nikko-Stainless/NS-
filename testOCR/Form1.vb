@@ -91,7 +91,7 @@ Public Class Form1
         ' 両方の情報が見つかった場合
         If companyCodeMatch.Success AndAlso companyNameMatch.Success Then
             ' 5桁の会社コードと会社名を返す
-            Return companyCodeMatch.Value & " " & ConvertToHalfWidth(companyNameMatch.Value.Trim())
+            Return companyCodeMatch.Value & " " & ConvertToHalfWidth(companyNameMatch.Value.Trim().Replace(" ", ""))
         Else
             ' 情報が見つからない場合
             Return String.Empty
@@ -119,7 +119,7 @@ Public Class Form1
         If companyCodeMatch.Success AndAlso companyNameMatch.Success Then
             ' 5桁の会社コードと会社名を返す
             Dim companyCode = companyCodeMatch.Value.Trim()
-            Return companyCode.Substring(companyCode.Length - 5) & " " & ConvertToHalfWidth(companyNameMatch.Value.Trim())
+            Return companyCode.Substring(companyCode.Length - 5) & " " & ConvertToHalfWidth(companyNameMatch.Value.Trim().Replace(" ", ""))
         Else
             Return String.Empty
         End If
