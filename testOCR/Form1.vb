@@ -10,7 +10,7 @@ Public Class Form1
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Dim currentMonth As Integer = DateTime.Now.Month
         cbbMonth.SelectedIndex = currentMonth - 1
-        fileINI = "F:\開発ドキュメント\リリースモジュール\新債権管理\請求書メール送信\settingApp"
+        fileINI = "F:\開発ドキュメント\リリースモジュール\新債権管理\請求書メール送信\settingApp\mailSetting.ini"
         cbbShimei.SelectedIndex = 0
     End Sub
 
